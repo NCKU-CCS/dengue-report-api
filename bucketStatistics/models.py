@@ -12,4 +12,4 @@ class BucketStatistics(models.Model):
     # 陽性率
     positive_rate = models.FloatField(default=0)
     # 平均卵數（十桶）
-    avg_egg_count = models.IntegerField(default=0)
+    avg_egg_count = models.FloatField(default=0)
