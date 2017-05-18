@@ -1,4 +1,5 @@
-# -*- coding: UTF-8 -*-
+#-*- coding: big5 -*-
+#-*- coding: cp950 -*-
 import csv
 import sys
 import codecs
@@ -11,17 +12,15 @@ def get_model_fields(model):
     return model._meta.fields
 
 filename = 'model.csv'
-if len(sys.argv) >= 2:
-    filename = sys.argv[1]
 
-with open(filename, 'w', encoding='utf-8-sig') as csvfile:
+with open(filename, 'w', encoding='big5') as csvfile:
     writer = csv.writer(csvfile, dialect='excel')
     fields = get_model_fields(BucketStatistics)
 
     row = []
     for field in fields:
         row.append(field.name)
-    writer.writerow(row)
+    writer.writerow(row[1:])
 
     for obj in BucketStatistics.objects.all():
         row = []
@@ -29,6 +28,6 @@ with open(filename, 'w', encoding='utf-8-sig') as csvfile:
             print('%s: %s(%s)'% ('field.name',getattr(obj, field.name), type(getattr(obj, field.name))))
             row.append(str(getattr(obj, field.name)))
         print(row)
-        writer.writerow(row)
+        writer.writerow(row[1:])
 
 
