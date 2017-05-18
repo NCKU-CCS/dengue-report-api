@@ -26,7 +26,10 @@ with open(filename, 'w', encoding='big5') as csvfile:
         row = []
         for field in fields:
             print('%s: %s(%s)'% ('field.name',getattr(obj, field.name), type(getattr(obj, field.name))))
-            row.append(str(getattr(obj, field.name)))
+            if isinstance(getattr(obj, field.name), float):
+                row.append('%.2f' % getattr(obj, field.name,4))
+            else:
+                row.append(str(getattr(obj, field.name)))
         print(row)
         writer.writerow(row[1:])
 
