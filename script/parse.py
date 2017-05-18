@@ -170,6 +170,7 @@ for item in village_list:
         total_egg_count = sum(r.egg_count for r in date_of_village_BucketRecords)
         bucketes_has_egg = sum(r.egg_count > 0 for r in date_of_village_BucketRecords)
         positive_rate = bucketes_has_egg / len(date_of_village_BucketRecords)
+        avg_egg_count = 10 * total_egg_count / len(date_of_village_BucketRecords)
 
         BucketStatistics(
             investigate_date=date,
@@ -178,6 +179,7 @@ for item in village_list:
             village=village,
             total_egg_count=total_egg_count,
             positive_rate=positive_rate,
+            avg_egg_count=avg_egg_count
         ).save()
 
 
