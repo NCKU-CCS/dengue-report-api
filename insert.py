@@ -1,3 +1,5 @@
+import django
+django.setup()
 from bucketStatistics.models import BucketStatistics
 from bucketRecord.models import BucketRecord
 

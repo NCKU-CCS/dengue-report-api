@@ -4,7 +4,8 @@ import csv
 import sys
 import codecs
 
-
+import django
+django.setup()
 from bucketStatistics.models import BucketStatistics
 
 
