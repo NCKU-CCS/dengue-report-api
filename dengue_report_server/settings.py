@@ -15,7 +15,6 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
@@ -25,7 +24,7 @@ SECRET_KEY = 'zwfe%m+va^(-i!+jj#ph4g@n%kpl&gjm*p7b=4h55o795k43(e'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -82,6 +81,8 @@ DATABASES = {
         'NAME': 'db',
         'USER': 'geo',
         'PASSWORD': 'netdb',
+        'HOST': '127.0.0.1',
+        'PORT': '5432'
     }
 }
 
