@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.gis',
     'bucket',
     'bucketRecord',
+    'bucketStatistics',
 ]
 
 MIDDLEWARE = [
