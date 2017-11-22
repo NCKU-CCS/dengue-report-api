@@ -13,7 +13,6 @@ import twd97
 django.setup()
 from bucket.models import Bucket
 from bucketRecord.models import BucketRecord
-from bucketStatistics.models import BucketStatistics
 from openpyxl import load_workbook
 
 
@@ -28,7 +27,6 @@ log.addHandler(ch)
 NO_DATA = -1
 
 Bucket.objects.all().delete()
-BucketStatistics.objects.all().delete()
 
 s3 = boto3.resource('s3')
 s3_client = boto3.client('s3')
@@ -147,34 +145,3 @@ for file_dict in file_list:
                     note=survey_note,
                 ).save()
     wb.close()
-
-for item in village_list:
-    county = item[0]
-    town = item[1]
-    village = item[2]
-
-    village_BucketRecords = BucketRecord.objects.filter(
-            county=county
-        ).filter(
-            town=town
-        ).filter(village=village)
-
-    investigate_dates = []
-    for record in village_BucketRecords:
-        if(record.investigate_date not in investigate_dates):
-            investigate_dates.append(record.investigate_date)
-
-    for date in investigate_dates:
-        date_of_village_BucketRecords = village_BucketRecords.filter(investigate_date=date)
-        total_egg_count = sum(r.egg_count for r in date_of_village_BucketRecords if r.egg_count > 0)
-        bucketes_has_egg = sum(r.egg_count > 0 for r in date_of_village_BucketRecords)
-        positive_rate = bucketes_has_egg / len(date_of_village_BucketRecords)
-
-        BucketStatistics(
-            investigate_date=date,
-            county=county,
-            town=town,
-            village=village,
-            total_egg_count=total_egg_count,
-            positive_rate=positive_rate,
-        ).save()
