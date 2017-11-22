@@ -25,6 +25,10 @@ ch = logging.StreamHandler(sys.stdout)
 ch.setFormatter(format)
 log.addHandler(ch)
 
+parselogger = logging.getLogger('parse')
+sheetlogger = logging.getLogger('sheet')
+progresslogger = logging.getLogger('progress')
+
 NO_DATA = -1
 
 Bucket.objects.all().delete()
@@ -55,12 +59,14 @@ for file_dict in file_list:
 
     s3_obj = s3.Object('dengue-report-source', file_dict['file_key'])
     wb = load_workbook(filename=BytesIO(s3_obj.get()['Body'].read()), read_only=True)
-    print(file_dict['file_name'])
+    parselogger.info(file_dict['file_name'])
     city = file_dict['city']
     for sheet_name in wb.get_sheet_names():
         sheet_name_match = re.search(r'\d+(年)?第\d+(週|周)', sheet_name)
         if sheet_name == '誘卵桶資訊':
+            sheetlogger.info(sheet_name)
             ws = wb['誘卵桶資訊']
+            progresslogger.debug('Bucket handle begin')
             for row in range(3, ws.max_row+1):
                 bucket_id = ws['A' + str(row)].value
                 if bucket_id == None:
@@ -94,10 +100,12 @@ for file_dict in file_list:
                        lat=bucket_lat,
                        point='POINT(%f %f)' % (bucket_x, bucket_y),
                        ).save()
+            progresslogger.debug('finish ' + str(ws.max_row + 1) + ' buckets')
 
         elif sheet_name_match:
             ws = wb[sheet_name]
-            print(sheet_name)
+            sheetlogger.info(sheet_name)
+            progresslogger.debug('record handle begin')
             for row in range(3, ws.max_row+1):
                 survey_date = ws['A' + str(row)].value
                 bucket_id = ws['B' + str(row)].value
@@ -129,7 +137,6 @@ for file_dict in file_list:
 
                 if([city, area, village] not in village_list):
                     village_list.append([city, area, village])
-
                 BucketRecord(
                     bucket_id=bucket_id,
                     investigate_date=survey_date,
@@ -146,6 +153,7 @@ for file_dict in file_list:
                     white_larvae_count=white_larvae_num,
                     note=survey_note,
                 ).save()
+            progresslogger.debug('finish ' + str(ws.max_row + 1) + ' records')
     wb.close()
 
 for item in village_list:
