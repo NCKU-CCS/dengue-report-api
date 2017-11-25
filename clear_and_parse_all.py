@@ -66,7 +66,7 @@ for file_dict in file_list:
         if sheet_name == '誘卵桶資訊':
             sheetlogger.info(sheet_name)
             ws = wb['誘卵桶資訊']
-            progresslogger.debug('Bucket handle begin')
+            progresslogger.info('Bucket handle begin')
             for row in range(3, ws.max_row+1):
                 bucket_id = ws['A' + str(row)].value
                 if bucket_id == None:
@@ -100,12 +100,12 @@ for file_dict in file_list:
                        lat=bucket_lat,
                        point='POINT(%f %f)' % (bucket_x, bucket_y),
                        ).save()
-            progresslogger.debug('finish ' + str(ws.max_row + 1) + ' buckets')
+            progresslogger.info('finish ' + str(ws.max_row + 1) + ' buckets')
 
         elif sheet_name_match:
             ws = wb[sheet_name]
             sheetlogger.info(sheet_name)
-            progresslogger.debug('record handle begin')
+            progresslogger.info('record handle begin')
             for row in range(3, ws.max_row+1):
                 survey_date = ws['A' + str(row)].value
                 bucket_id = ws['B' + str(row)].value
@@ -153,7 +153,7 @@ for file_dict in file_list:
                     white_larvae_count=white_larvae_num,
                     note=survey_note,
                 ).save()
-            progresslogger.debug('finish ' + str(ws.max_row + 1) + ' records')
+            progresslogger.info('finish ' + str(ws.max_row + 1) + ' records')
     wb.close()
 
 for item in village_list:

@@ -36,7 +36,7 @@ s3 = boto3.resource('s3')
 s3_client = boto3.client('s3')
 file_list = list()
 village_list = [];
-weeknum = int(datetime.now().strftime('%U'))
+weeknum = datetime.now().strftime('%U')
 
 for key in s3.Bucket('dengue-report-source').objects.all():
     if key.key.endswith(".xlsx"):
@@ -63,7 +63,7 @@ for file_dict in file_list:
         if sheet_name == '誘卵桶資訊':
             sheetlogger.info(sheet_name)
             ws = wb['誘卵桶資訊']
-            progresslogger.debug('Bucket handle begin')
+            progresslogger.info('Bucket handle begin')
             for row in range(3, ws.max_row+1):
                 bucket_id = ws['A' + str(row)].value
                 if bucket_id == None:
@@ -97,12 +97,12 @@ for file_dict in file_list:
                        lat=bucket_lat,
                        point='POINT(%f %f)' % (bucket_x, bucket_y),
                        ).save()
-            progresslogger.debug('finish ' + str(ws.max_row + 1) + ' buckets')
+            progresslogger.info('finish ' + str(ws.max_row + 1) + ' buckets')
 
         elif sheet_name_match and sheet_name_match.group(2) == weeknum:
             ws = wb[sheet_name]
-            print(sheet_name)
-            progresslogger.debug('record handle begin')
+            sheetlogger.info(sheet_name)
+            progresslogger.info('record handle begin')
             for row in range(3, ws.max_row+1):
                 survey_date = ws['A' + str(row)].value
                 bucket_id = ws['B' + str(row)].value
@@ -134,22 +134,41 @@ for file_dict in file_list:
 
                 if([city, area, village] not in village_list):
                     village_list.append([city, area, village])
-
-                BucketRecord(
+                
+                dup_records_num = len(BucketRecord.objects.filter(
                     bucket_id=bucket_id,
                     investigate_date=survey_date,
-                    county=city,
-                    town=area,
-                    village=village,
-                    # 卵數、埃及孵化卵數、白線孵化卵數
-                    egg_count=egg_num,
-                    egypt_egg_count=egypt_egg_num,
-                    white_egg_count=white_egg_num,
-                    # 孑孓、埃及幼蟲、白線幼蟲
-                    larvae_count=larvae_num,
-                    egypt_larvae_count=egypt_larvae_num,
-                    white_larvae_count=white_larvae_num,
-                    note=survey_note,
-                ).save()
-            progresslogger.debug('finish ' + str(ws.max_row + 1) + ' records')
+                    county=city
+                ))
+
+                if dup_records_num > 1:
+                    warning_str = 'duplicated records:', bucket_id, investigate_date, city
+                    progresslogger.warning(warning_str)
+                    record_exist = True
+                elif dup_records_num == 1:
+                    record_exist = True
+                elif dup_records_num == 0:
+                    record_exist = False
+                
+                if not record_exist:
+                    progresslogger.info(
+                        'save object:' + bucket_id, + str(survey_date))
+                    BucketRecord(
+                        bucket_id=bucket_id,
+                        investigate_date=survey_date,
+                        county=city,
+                        town=area,
+                        village=village,
+                        # 卵數、埃及孵化卵數、白線孵化卵數
+                        egg_count=egg_num,
+                        egypt_egg_count=egypt_egg_num,
+                        white_egg_count=white_egg_num,
+                        # 孑孓、埃及幼蟲、白線幼蟲
+                        larvae_count=larvae_num,
+                        egypt_larvae_count=egypt_larvae_num,
+                        white_larvae_count=white_larvae_num,
+                        note=survey_note,
+                    ).save()
+                    
+            progresslogger.info('finish ' + str(ws.max_row + 1) + ' records')
     wb.close()
