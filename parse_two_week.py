@@ -36,7 +36,13 @@ s3 = boto3.resource('s3')
 s3_client = boto3.client('s3')
 file_list = list()
 village_list = [];
-weeknum = datetime.now().strftime('%U')
+weeknum = int(datetime.now().strftime('%U'))
+this_year_str = datetime.now().strftime('%Y')
+accept_weeks = []
+
+accept_weeks.append(str(weeknum))
+accept_weeks.append(str(weeknum - 1))
+
 
 for key in s3.Bucket('dengue-report-source').objects.all():
     if key.key.endswith(".xlsx"):
@@ -59,7 +65,7 @@ for file_dict in file_list:
     parselogger.info(file_dict['file_name'])
     city = file_dict['city']
     for sheet_name in wb.get_sheet_names():
-        sheet_name_match = re.search(r'\d+(年)?第(\d+)(週|周)', sheet_name)
+        sheet_name_match = re.search(r'(\d+)(年)?第(\d+)(週|周)', sheet_name)
         if sheet_name == '誘卵桶資訊':
             sheetlogger.info(sheet_name)
             ws = wb['誘卵桶資訊']
@@ -99,7 +105,7 @@ for file_dict in file_list:
                        ).save()
             progresslogger.info('finish ' + str(ws.max_row + 1) + ' buckets')
 
-        elif sheet_name_match and sheet_name_match.group(2) == weeknum:
+        elif sheet_name_match and sheet_name_match.group(3) in accept_weeks and sheet_name_match.group(1) == this_year_str:
             ws = wb[sheet_name]
             sheetlogger.info(sheet_name)
             progresslogger.info('record handle begin')
@@ -142,7 +148,7 @@ for file_dict in file_list:
                 ))
 
                 if dup_records_num > 1:
-                    warning_str = 'duplicated records:', bucket_id, investigate_date, city
+                    warning_str = 'duplicated records:' + str(bucket_id) + str(survey_date) + city
                     progresslogger.warning(warning_str)
                     record_exist = True
                 elif dup_records_num == 1:
@@ -152,7 +158,7 @@ for file_dict in file_list:
                 
                 if not record_exist:
                     progresslogger.info(
-                        'save object:' + bucket_id + str(survey_date))
+                        'save object:' + str(bucket_id) + ',' + str(survey_date))
                     BucketRecord(
                         bucket_id=bucket_id,
                         investigate_date=survey_date,
