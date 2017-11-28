@@ -152,7 +152,7 @@ for file_dict in file_list:
                 
                 if not record_exist:
                     progresslogger.info(
-                        'save object:' + bucket_id, + str(survey_date))
+                        'save object:' + bucket_id + str(survey_date))
                     BucketRecord(
                         bucket_id=bucket_id,
                         investigate_date=survey_date,
